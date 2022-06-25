@@ -16,7 +16,7 @@
     <div v-if="displayAll" class="allTasks">
         <h2>Все задачи:</h2>
         <ol>
-            <li v-for="(task, index) in tasks.allTasks" :key="index" @click="completedTask">{{ task }}</li>
+            <li v-for="(task, index) in tasks.allTasks" :key="index" @click="completedTask" v-bind:class="{completed: task.isComplete}">{{ task.name }}</li>
         </ol>
     </div>
 
@@ -64,7 +64,7 @@ export default {
     methods: {
         addTask() {
             if(this.task != null && this.task.length < 100) {
-              this.tasks.allTasks.push(this.task);
+              this.tasks.allTasks.push({name: this.task, isComplete: false});
               this.tasks.inprogressTasks.push(this.task)
               axios.put("https://todolist-e0681-default-rtdb.europe-west1.firebasedatabase.app/todolist.json", this.tasks)
               .then((response) => {
@@ -77,11 +77,15 @@ export default {
             }
         },
         completedTask(event) {
+            // console.log(JSON.parse(event.target.innerText).name)
             if(this.tasks.completedTasks.indexOf(event.target.innerText) == -1) {
                 this.tasks.completedTasks.push(event.target.innerText);
-            // this.isCompleted = true;
-            event.target.style.opacity = 0.5;
-            event.target.style.textDecoration = 'line-through';
+            for(let prop of this.tasks.allTasks) {
+                if (event.target.innerText == prop.name) {
+                    prop.isComplete = true
+                }
+                
+            }
             let idx = this.tasks.inprogressTasks.indexOf(event.target.innerText);
             this.tasks.inprogressTasks.splice(idx,1);
              axios.put("https://todolist-e0681-default-rtdb.europe-west1.firebasedatabase.app/todolist.json", this.tasks)
@@ -138,9 +142,7 @@ export default {
             }
             
         });
-        for(let task in this.tasks.completedTasks) {
-            console.log(task)
-        }
+
     },
 
 }
