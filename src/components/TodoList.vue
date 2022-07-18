@@ -3,8 +3,8 @@
     <h1>Список задач</h1>
     <div class="btnBlock">
             <button @click="allTasksShow" class="btnAll">Все задачи</button>
-            <button @click="inprogressShow" class="btnPrgrs">Текущие задачи</button>
-            <button @click="completedShow" class="btnComp">Выполненные задачи</button>
+            <button @click="inprogressShow" class="btnAll">Текущие задачи</button>
+            <button @click="completedShow" class="btnAll">Выполненные задачи</button>
         </div>
     <div v-if="inputShow" class="inputBlock">
         <input type="text" @keydown.enter="addTask" class="taskInput" v-model="task">
@@ -12,6 +12,7 @@
             <button @click="addTask"  class="addTask">Добавить</button>
             <button @click="cancel" class="cancel">Отмена</button>
         </div>
+        
     </div>
     <div v-if="displayAll" class="allTasks">
         <h2>Все задачи:</h2>
@@ -63,7 +64,9 @@ export default {
     },
     methods: {
         addTask() {
-            if(this.task != null && this.task.length < 100) {
+            if(this.task == null){
+                alert('Ошибка ввода: не оcтавляйте строку ввода пустой');
+            }  else if(this.task != null && this.task.length < 100) {
               this.tasks.allTasks.push({name: this.task, isComplete: false});
               this.tasks.inprogressTasks.push(this.task)
               axios.put("https://todolist-e0681-default-rtdb.europe-west1.firebasedatabase.app/todolist.json", this.tasks)
@@ -74,10 +77,13 @@ export default {
                 });
               this.task = null;
               this.inputShow = false;
+            } else if (this.task.length >= 100) {
+                alert('Ошибка ввода: слишком много символов');
+                this.task = null;
             }
+
         },
         completedTask(event) {
-            // console.log(JSON.parse(event.target.innerText).name)
             if(this.tasks.completedTasks.indexOf(event.target.innerText) == -1) {
                 this.tasks.completedTasks.push(event.target.innerText);
             for(let prop of this.tasks.allTasks) {
@@ -130,15 +136,18 @@ export default {
             
         )
         .then(data => {
-            if(Object.prototype.hasOwnProperty.call(data, "allTasks")) {
-             this.tasks.allTasks = data.allTasks;   
+            if(data != null) {
+                if(Object.prototype.hasOwnProperty.call(data, "allTasks")) {
+                    this.tasks.allTasks = data.allTasks;   
+                }
+                if(Object.prototype.hasOwnProperty.call(data, "inprogressTasks")) {
+                    this.tasks.inprogressTasks = data.inprogressTasks;  
+                }
+                 if(Object.prototype.hasOwnProperty.call(data, "completedTasks")) {
+                    this.tasks.completedTasks = data.completedTasks;  
+                }
             }
-            if(Object.prototype.hasOwnProperty.call(data, "inprogressTasks")) {
-              this.tasks.inprogressTasks = data.inprogressTasks;  
-            }
-            if(Object.prototype.hasOwnProperty.call(data, "completedTasks")) {
-              this.tasks.completedTasks = data.completedTasks;  
-            }
+           
             
         });
 
@@ -164,7 +173,6 @@ export default {
 .btnBlock {
     position: absolute;
     top: 80px;
-    /* left: 440px; */
     align-self: center;
     display: flex;
     flex-direction: column;
@@ -175,8 +183,6 @@ export default {
 }
 .btnAll {
     height: 30px;
-    /* border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px; */
     border: 1px solid white;
     background: rgb(18, 223, 114);
     font-size: 18px;
@@ -195,8 +201,6 @@ export default {
     height: 30px;
     border: 1px solid white;
     background: rgb(18, 223, 114);
-    /* border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px; */
     font-size: 18px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
@@ -205,13 +209,11 @@ export default {
     height: 200px;
     background: rgb(240, 235, 235);
     margin-bottom: 0;
-    /* border-top: 1px solid grey; */
     border-bottom: 1px solid grey;
 }
 .newTask {
     transform: scale(0.6);
     box-sizing: border-box;
-    /* padding: 5px 5px; */
     border-radius: 50%;
     border: none;
     background: rgb(18, 223, 114);
@@ -296,10 +298,9 @@ ol {
 }
  li {
     font-size: 16px;
-    padding: 10px;
     height: 50px;
     border-bottom: 1px solid grey;
-    width: 100%;
+    width: 90%;
     text-align: center;
     padding-top: 30px;
 }
@@ -308,6 +309,10 @@ li:last-child {
 }
 .allTasks li:hover {
     cursor: pointer;
+}
+.completed {
+    text-decoration: line-through;
+    opacity: 0.5;
 }
 }
 @media screen and (min-width: 768px){
@@ -325,7 +330,6 @@ li:last-child {
 .btnBlock {
     position: absolute;
     top: 80px;
-    /* left: 440px; */
     align-self: center;
     display: flex;
     flex-direction: column;
@@ -336,8 +340,6 @@ li:last-child {
 }
 .btnAll {
     height: 30px;
-    /* border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px; */
     border: 1px solid white;
     background: rgb(18, 223, 114);
     font-size: 18px;
@@ -356,8 +358,6 @@ li:last-child {
     height: 30px;
     border: 1px solid white;
     background: rgb(18, 223, 114);
-    /* border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px; */
     font-size: 18px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
@@ -366,13 +366,11 @@ li:last-child {
     height: 200px;
     background: rgb(240, 235, 235);
     margin-bottom: 0;
-    /* border-top: 1px solid grey; */
     border-bottom: 1px solid grey;
 }
 .newTask {
     transform: scale(0.6);
     box-sizing: border-box;
-    /* padding: 5px 5px; */
     border-radius: 50%;
     border: none;
     background: rgb(18, 223, 114);
@@ -403,7 +401,7 @@ li:last-child {
     width: 40rem;
     border-radius: 10px;
     padding-left: 20px;
-    font-size: 20px;
+    font-size: 30px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
 }
@@ -450,6 +448,9 @@ li:last-child {
 .allTasks, .completedTasks, .inprogressTasks {
     background: rgb(249, 247, 247);
 }
+.allTasks h2, .completedTasks h2, .inprogressTasks h2 {
+    font-size: 36px;
+}
 ol {
     padding: 0;
     list-style-type: none;
@@ -457,12 +458,12 @@ ol {
 }
  li {
     font-size: 16px;
-    padding: 10px;
     height: 50px;
     border-bottom: 1px solid grey;
     width: 100%;
     text-align: center;
     padding-top: 30px;
+    font-size: 26px;
 }
 li:last-child {
     border-bottom: none;
@@ -472,7 +473,9 @@ li:last-child {
 }
 }
 
-/* @media screen and (min-width: 769px) and (max-width: 2500px){
+/* @media screen 1024px */
+
+@media screen and (min-width: 1024px) {
     .container {
     display: flex;
     justify-content: center;
@@ -483,24 +486,27 @@ li:last-child {
     position: relative;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
+    width: 768px;
+    margin: 0 auto;
 }
 .btnBlock {
-    position: absolute;
-    top: 80px;
-    align-self: center;
+    display: flex;
+    flex-direction: row;
 }
 .btnBlock :hover {
     cursor: pointer;
 }
+h2 {
+    font-size: 34px;
+}
 .btnAll {
     height: 50px;
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
     border: 1px solid white;
     background: rgb(18, 223, 114);
-    font-size: 18px;
+    font-size: 24px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
+    padding: 10px;
 }
 .btnPrgrs {
     height: 50px;
@@ -540,52 +546,54 @@ li:last-child {
     top: 190px;
     right: 50px;
     color: white;
+    transform: scale(1.4)
 }
 .newTask:hover {
     cursor: pointer;
 }
 .inputBlock {
-    align-self: center;
-    display: flex;
-    flex-direction: column;
     margin: 10px 10px;
 }
 .taskInput {
     margin: 10px;
-    height: 40px;
-    width: 40rem;
+    height: 80px;
+    width: 700px;
     border-radius: 10px;
     padding-left: 20px;
-    font-size: 20px;
+    font-size: 60px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
 }
 .addTask {
-    width: 150px;
-    height: 40px;
+    width: 200px;
+    height: 60px;
     border-radius: 5em;
     background: rgb(18, 223, 114);
     margin: 5px;
     border: none;
-    font-size: 18px;
+    font-size: 26px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
     color: white;
+    margin: 0 auto;
 }
 .addTask:hover {
     background: rgb(0, 244, 114);
 }
 .cancel {
-    width: 100px;
-    height: 40px;
+    width: 200px;
+    height: 60px;
     border-radius: 5em;
     background: rgb(235, 44, 44);
     margin: 5px;
     border: none;
-    font-size: 18px;
+    font-size: 26px;
     font-family: 'Be Vietnam Pro', sans-serif;
     font-family: 'Comfortaa', cursive;
     color: white;
+    position: relative;
+    left: 270px;
+    
 }
 .cancel:hover {
     background: rgb(253, 2, 2);
@@ -606,9 +614,8 @@ ol {
     margin: 0;
 }
  li {
-    font-size: 24px;
-    padding: 10px;
-    height: 50px;
+    font-size: 30px;
+    height: 70px;
     border-bottom: 1px solid grey;
     width: 100%;
     text-align: center;
@@ -627,6 +634,6 @@ li:last-child {
 }
 button:hover {
     cursor: pointer;
-} */
+}
 
 </style>
